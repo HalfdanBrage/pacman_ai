@@ -16,6 +16,7 @@ class Pacman(Entity):
         self.alive = True
         self.sprites = PacmanSprites(self)
         self.ai = ai
+        self.i = 0
 
     def reset(self):
         Entity.reset(self)
@@ -28,11 +29,14 @@ class Pacman(Entity):
     def die(self):
         self.alive = False
         self.direction = STOP
-
+    
     def update(self, dt):	
         self.sprites.update(dt)
         self.position += self.directions[self.direction]*self.speed*dt
+        
+        print("CALL AI: " + str(self.i))
         direction = self.ai.get_movement_direction()
+        self.i += 1
         if self.overshotTarget():
             self.node = self.target
             if self.node.neighbors[PORTAL] is not None:
@@ -78,3 +82,16 @@ class Pacman(Entity):
         if dSquared <= rSquared:
             return True
         return False
+
+    def validDirections(self):
+        directions = []
+        for key in [UP, DOWN, LEFT, RIGHT]:
+            if self.validDirection(key):
+                directions.append(key)
+        if self.target != self.node:
+            print("----------------------------------")
+            if not self.direction in directions:
+                directions.append(self.direction)
+            if not self.direction * -1 in directions:
+                directions.append(self.direction * -1)
+        return directions
