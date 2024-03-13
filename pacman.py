@@ -4,9 +4,10 @@ from vector import Vector2
 from constants import *
 from entity import Entity
 from sprites import PacmanSprites
+from ai.pacman import PacmanAI
 
 class Pacman(Entity):
-    def __init__(self, node):
+    def __init__(self, node, ai : PacmanAI):
         Entity.__init__(self, node )
         self.name = PACMAN    
         self.color = YELLOW
@@ -14,6 +15,7 @@ class Pacman(Entity):
         self.setBetweenNodes(LEFT)
         self.alive = True
         self.sprites = PacmanSprites(self)
+        self.ai = ai
 
     def reset(self):
         Entity.reset(self)
@@ -30,7 +32,7 @@ class Pacman(Entity):
     def update(self, dt):	
         self.sprites.update(dt)
         self.position += self.directions[self.direction]*self.speed*dt
-        direction = self.getValidKey()
+        direction = self.ai.get_movement_direction()
         if self.overshotTarget():
             self.node = self.target
             if self.node.neighbors[PORTAL] is not None:
