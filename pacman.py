@@ -34,11 +34,11 @@ class Pacman(Entity):
         self.sprites.update(dt)
         self.position += self.directions[self.direction]*self.speed*dt
         
-        print("CALL AI: " + str(self.i))
-        direction = self.ai.get_movement_direction()
         self.i += 1
         if self.overshotTarget():
             self.node = self.target
+            # print("CALL AI: " + str(self.i))
+            direction = self.ai.get_movement_direction()
             if self.node.neighbors[PORTAL] is not None:
                 self.node = self.node.neighbors[PORTAL]
             self.target = self.getNewTarget(direction)
@@ -51,8 +51,10 @@ class Pacman(Entity):
                 self.direction = STOP
             self.setPosition()
         else: 
+            direction = self.ai.get_movement_direction()
             if self.oppositeDirection(direction):
                 self.reverseDirection()
+
 
     def getValidKey(self):
         key_pressed = pygame.key.get_pressed()

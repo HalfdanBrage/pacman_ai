@@ -9,6 +9,13 @@ from ghosts import GhostGroup, Ghost
 from entity import Entity
 from nodes import Node
 
+dir_prios = {1: 0, -1: 0, 2: 1, -2: 0}
+
+def randomize_dir_prios():
+    global dir_prios
+    dir_prios = {k: 0 for k in dir_prios.keys()}
+    print(dir_prios)
+
 
 def check_change_state():
     return False
@@ -23,9 +30,12 @@ def get_movement_direction(pacman: Entity, ghosts: GhostGroup):
     return dir
 
 
+dir_prios = {}
 def get_safest_dir(pacman: Entity, dir_weights):
+    global dir_prios
     dir = 0
     weight = math.inf
+    prio = 0
     for _dir in get_valid_directions(pacman):
         _weight = 0
         _dir_vec = pacman.directions[_dir]
@@ -37,11 +47,13 @@ def get_safest_dir(pacman: Entity, dir_weights):
         if _weight < weight:
             dir = _dir
             weight = _weight
-        elif _weight == weight and random.randint(0, 1):
+            prio = dir_prios[dir]
+        elif _weight == weight and prio < dir_prios[_dir]:
             dir = _dir
             weight = _weight
-    print("dir: " + str(pacman.directions[dir]))
-    print("weight: " + str(weight))
+            prio = dir_prios[dir]
+    # print("dir: " + str(pacman.directions[dir]))
+    # print("weight: " + str(weight))
     return dir
 
 def get_valid_directions(pacman: Entity):
@@ -50,6 +62,7 @@ def get_valid_directions(pacman: Entity):
             return [2, -2]
         else:
             return [1, -1]
+    randomize_dir_prios()
     return pacman.validDirections()
 
 
@@ -63,12 +76,18 @@ def get_dijkstras_direction_weights(pacman: Entity, ghosts: GhostGroup):
     dirs = {}
     for ghost in ghosts.ghosts:
         dist, pos = dijkstras(pacman, ghost)
-        dirs[(pos- pacman.position).normalized()] = weight_dist(dist)
+        dir = (pos - pacman.position).normalized()
+        if dir in dirs.keys():
+            dirs[dir] = dirs[dir] + weight_dist(dist)
+        else:
+            dirs[dir] = weight_dist(dist)
+    dirs = {k: v for k, v in dirs.items() if v > 1000}
+    print(dirs)
     return dirs
 
 def weight_dist(dist):
     raw_dist = math.inf if dist == 0 else (1 + 1000.0/dist)
-    return raw_dist**4
+    return min(raw_dist**4, 2**31)
 
 
 def explore(node, s):
