@@ -13,8 +13,7 @@ dir_prios = {1: 0, -1: 0, 2: 1, -2: 0}
 
 def randomize_dir_prios():
     global dir_prios
-    dir_prios = {k: 0 for k in dir_prios.keys()}
-    print(dir_prios)
+    dir_prios = {k: random.random() for k in dir_prios.keys()}
 
 
 def check_change_state():
@@ -30,7 +29,6 @@ def get_movement_direction(pacman: Entity, ghosts: GhostGroup):
     return dir
 
 
-dir_prios = {}
 def get_safest_dir(pacman: Entity, dir_weights):
     global dir_prios
     dir = 0
@@ -76,13 +74,13 @@ def get_dijkstras_direction_weights(pacman: Entity, ghosts: GhostGroup):
     dirs = {}
     for ghost in ghosts.ghosts:
         dist, pos = dijkstras(pacman, ghost)
-        dir = (pos - pacman.position).normalized()
-        if dir in dirs.keys():
-            dirs[dir] = dirs[dir] + weight_dist(dist)
-        else:
-            dirs[dir] = weight_dist(dist)
+        if dist != None:
+            dir = (pos - pacman.position).normalized()
+            if dir in dirs.keys():
+                dirs[dir] = dirs[dir] + weight_dist(dist)
+            else:
+                dirs[dir] = weight_dist(dist)
     dirs = {k: v for k, v in dirs.items() if v > 1000}
-    print(dirs)
     return dirs
 
 def weight_dist(dist):
@@ -140,7 +138,10 @@ def dijkstras(pacman: Entity, ghost: Ghost):
         if from_nodes[t_node] != None:
             pygame.draw.line(pygame.display.get_surface(), (255, 0, 0), t_node.position.asTuple(), from_nodes[t_node].position.asTuple(), round(weight_dist(distances[ghost.node]) / 100))
     pygame.draw.line(pygame.display.get_surface(), (255, 0, 0), pacman.position.asTuple(), t_node.position.asTuple(), round(weight_dist(distances[ghost.node]) / 100))
-    return (distances[ghost.node], t_node.position)
+    if from_nodes[ghost.node] != None:
+        if (from_nodes[ghost.node].position - ghost.node.position).normalized() == pacman.directions[ghost.direction]:
+            return (distances[ghost.node], t_node.position)
+    return None, None
 
 
 
