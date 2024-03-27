@@ -27,10 +27,15 @@ class Vector2(object):
         return self.__div__(scalar)
 
     def __eq__(self, other):
+        if other == None:
+            return False
         if abs(self.x - other.x) < self.thresh:
             if abs(self.y - other.y) < self.thresh:
                 return True
         return False
+
+    def __hash__(self):
+        return hash(str(self.x) + str(self.y))
 
     def magnitudeSquared(self):
         return self.x**2 + self.y**2

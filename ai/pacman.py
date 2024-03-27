@@ -11,4 +11,5 @@ class PacmanAI():
         if self.pacman is not None and self.ghosts is not None:
             return flee.get_movement_direction(self.pacman, self.ghosts)
         else:
+            print("FAILING")
             return UP
