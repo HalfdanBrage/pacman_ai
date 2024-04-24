@@ -6,10 +6,12 @@ class PacmanAI():
     def __init__(self):
         self.pacman = None
         self.ghosts = None
+        self.globals = None
 
     def get_movement_direction(self):
-        if self.pacman is not None and self.ghosts is not None:
-            return flee.get_movement_direction(self.pacman, self.ghosts)
+        if self.globals is not None:
+            print(type(self.globals.pacman.node.id))
+            return flee.get_movement_direction(self.globals.pacman, self.globals.ghosts)
         else:
             print("FAILING")
             return UP

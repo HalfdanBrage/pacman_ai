@@ -54,10 +54,8 @@ class GameController(object):
         self.mazedata.obj.setPortalPairs(self.nodes)
         self.mazedata.obj.connectHomeNodes(self.nodes)
         self.pacman= Pacman(self.nodes.getNodeFromTiles(*self.mazedata.obj.pacmanStart), self.ai)
-        self.ai.pacman = self.pacman
         self.pellets = PelletGroup(self.mazedata.obj.name+".txt")
         self.ghosts= GhostGroup(self.nodes.getStartTempNode(), self.pacman)
-        self.ai.ghosts = self.ghosts
 
         self.ghosts.pinky.setStartNode(self.nodes.getNodeFromTiles(*self.mazedata.obj.addOffset(2, 3)))
         self.ghosts.inky.setStartNode(self.nodes.getNodeFromTiles(*self.mazedata.obj.addOffset(0, 3)))
@@ -70,6 +68,8 @@ class GameController(object):
         self.ghosts.inky.startNode.denyAccess(RIGHT, self.ghosts.inky)
         self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
         self.mazedata.obj.denyGhostsAccess(self.ghosts, self.nodes)
+
+        self.ai.globals = self
 
     def startGame_old(self):      
         self.mazedata.loadMaze(self.level)#######
@@ -99,6 +99,7 @@ class GameController(object):
         self.nodes.denyAccessList(15, 14, UP, self.ghosts)
         self.nodes.denyAccessList(12, 26, UP, self.ghosts)
         self.nodes.denyAccessList(15, 26, UP, self.ghosts)
+
 
         
 
