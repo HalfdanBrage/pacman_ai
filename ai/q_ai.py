@@ -34,7 +34,7 @@ def reset():
     scores.append(score)
     print(str(run_count) + " games, average score: " + str(sum(scores)/len(scores)))
     if q_table != {}:
-        if run_count % 100 == 0:
+        if run_count % 1000 == 0:
             minimize_q_table(q_table)
         t = multiprocessing.Process(target = save_q_table)
         t.start()
