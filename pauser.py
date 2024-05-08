@@ -15,6 +15,7 @@ class Pause(object):
                 return self.func
         return None
 
+
     def setPause(self, playerPaused=False, pauseTime=None, func=None):
         self.timer = 0
         self.func = func

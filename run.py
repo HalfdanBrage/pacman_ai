@@ -22,7 +22,7 @@ class GameController(object):
         self.background_flash = None
         self.clock = pygame.time.Clock()
         self.fruit = None
-        self.pause = Pause(True)
+        self.pause = Pause(False)
         self.level = 0
         self.lives = 5
         self.score = 0
@@ -104,7 +104,8 @@ class GameController(object):
         
 
     def update(self):
-        dt = self.clock.tick(30) / 1000.0
+        dt = 0.1
+        #dt = self.clock.tick(30) / 1000.0
         self.textgroup.update(dt)
         self.pellets.update(dt)
         if not self.pause.paused:
@@ -187,10 +188,15 @@ class GameController(object):
                         self.pacman.die()               
                         self.ghosts.hide()
                         if self.lives <= 0:
-                            self.textgroup.showText(GAMEOVERTXT)
-                            self.pause.setPause(pauseTime=3, func=self.restartGame)
+                            self.restartGame()
                         else:
-                            self.pause.setPause(pauseTime=3, func=self.resetLevel)
+                            self.resetLevel()
+                        
+                        #if self.lives <= 0:
+                        #    self.textgroup.showText(GAMEOVERTXT)
+                        #    self.pause.setPause(pauseTime=3, func=self.restartGame)
+                        #else:
+                        #    self.pause.setPause(pauseTime=3, func=self.resetLevel)
     
     def checkFruitEvents(self):
         if self.pellets.numEaten == 50 or self.pellets.numEaten == 140:
@@ -230,7 +236,7 @@ class GameController(object):
     def restartGame(self):
         self.lives = 5
         self.level = 0
-        self.pause.paused = True
+        # self.pause.paused = True
         self.fruit = None
         self.startGame()
         self.score = 0
@@ -241,7 +247,7 @@ class GameController(object):
         self.fruitCaptured = []
 
     def resetLevel(self):
-        self.pause.paused = True
+        # self.pause.paused = True
         self.pacman.reset()
         self.ghosts.reset()
         self.fruit = None
