@@ -14,7 +14,7 @@ score = 0
 def get_direction(globals, last_node, explore = False):
     global state, direction, q_table
     if last_node == None or q_table == {}:
-        reset()
+        reset(globals)
     update_q_table(globals)
 
     if state and last_node:
@@ -28,7 +28,7 @@ def get_direction(globals, last_node, explore = False):
     return int(direction)
 
 run_count = 0
-def reset():
+def reset(globals):
     global history, q_table, score, run_count
     run_count += 1
     scores.append(score)
@@ -36,7 +36,7 @@ def reset():
     if q_table != {}:
         if run_count % 1000 == 0:
             minimize_q_table(q_table)
-        t = multiprocessing.Process(target = save_q_table)
+        t = multiprocessing.Process(target = save_q_table, args=(q_table, ))
         t.start()
     else:
         load_q_table()     
@@ -84,8 +84,7 @@ def load_q_table():
             except:
                 q_table = {}
 
-def save_q_table():
-    global q_table
+def save_q_table(q_table):
     f = open("ai/trainingdata", "w")
     f.write(json.dumps(q_table))
     f.close()
