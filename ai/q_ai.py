@@ -7,15 +7,15 @@ direction = 0
 #{state : {actions: [values]}}
 q_table = {}
 history = []
+scores = []
+score = 0
 
 ## update state, then do lookup
 def get_direction(globals, last_node, explore = False):
     global state, direction, q_table
-    if last_node == None:
+    if last_node == None or q_table == {}:
         reset()
-    load_q_table() # Should be moved
     update_q_table(globals)
-    save_q_table()
 
     if state and last_node:
         update_state(globals, state, last_node)
@@ -28,30 +28,40 @@ def get_direction(globals, last_node, explore = False):
     return int(direction)
 
 def reset():
-    global history
+    global history, q_table, score
+    scores.append(score)
+    print("Average Score: " + str(sum(scores)/len(scores)))
+    if q_table != {}:
+        save_q_table()
     history = []
+    load_q_table() 
+    for k in q_table.keys():
+        for dir in q_table[k].keys():
+            q_table[k][dir] = sorted(q_table[k][dir], reverse = True)[:40]
+        
 
 def choose_direction(globals, explore = False):
     global q_table, state
     if state.generate_hash() in q_table:
         available_directions = globals.pacman.validDirections()
-        print("Seen")
         high_val = -math.inf
         best_dir = 0
         for dir in available_directions:
                 if explore:
-                    if str(best_dir) in q_table[state.generate_hash()] or random.randint(0, 4) == 1:
+                    if not str(dir) in q_table[state.generate_hash()] or random.randint(0, 20) == 1:
+                        best_dir = dir
+                        break
+                    elif len(q_table[state.generate_hash()][str(dir)]) < 20:
                         best_dir = dir
                         break
                 if str(dir) in q_table[state.generate_hash()]:
                     point_values = sorted(q_table[state.generate_hash()][str(dir)], reverse = True)
-                    avg_high_value = sum(point_values[:4])/4
+                    avg_high_value = sum(point_values[:4])/(4 if len(point_values) > 4 else len(point_values))
 
                     if avg_high_value > high_val:
                         high_val = avg_high_value
                         best_dir = dir
         return str(best_dir)
-    print("New")
     return str(random.choice(globals.pacman.validDirections()))
 
 
@@ -105,7 +115,8 @@ def get_initial_state(globals):
 
 prev_score = 0
 def get_fitness(globals):
-    global q_table, history, prev_score
+    global q_table, history, prev_score, score
+    score = globals.score
     fitness = globals.score - prev_score
     prev_score = globals.score
     for i, item in enumerate(history):
