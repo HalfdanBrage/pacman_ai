@@ -1,4 +1,4 @@
-import random, json, math, threading, datetime
+import random, json, math, multiprocessing, datetime
 
 from ai.q_state import State
 
@@ -36,7 +36,8 @@ def reset():
     if q_table != {}:
         if run_count % 100 == 0:
             minimize_q_table(q_table)
-        threading.Thread(target = save_q_table, args = (q_table,)).start()
+        t = multiprocessing.Process(target = save_q_table)
+        t.start()
     else:
         load_q_table()     
         minimize_q_table(q_table)
@@ -83,7 +84,8 @@ def load_q_table():
             except:
                 q_table = {}
 
-def save_q_table(q_table):
+def save_q_table():
+    global q_table
     f = open("ai/trainingdata", "w")
     f.write(json.dumps(q_table))
     f.close()

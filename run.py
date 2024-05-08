@@ -1,3 +1,6 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+
 import pygame
 from pygame.locals import *
 from constants import *
@@ -22,7 +25,7 @@ class GameController(object):
         self.background_flash = None
         self.clock = pygame.time.Clock()
         self.fruit = None
-        self.pause = Pause(False)
+        self.pause = Pause(True)
         self.level = 0
         self.lives = 5
         self.score = 0
@@ -106,6 +109,7 @@ class GameController(object):
     def update(self):
         dt = 0.04
         #dt = self.clock.tick(30) / 1000.0
+        #dt = 0.001
         self.textgroup.update(dt)
         self.pellets.update(dt)
         if not self.pause.paused:
