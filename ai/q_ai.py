@@ -55,7 +55,7 @@ def choose_direction(globals, explore = False):
         best_dir = 0
         for dir in available_directions:
                 if explore:
-                    if not str(dir) in q_table[state.generate_hash()] or random.randint(0, 20) == 1:
+                    if not str(dir) in q_table[state.generate_hash()] or random.randint(0, 4) == 1:
                         best_dir = dir
                         break
                     elif len(q_table[state.generate_hash()][str(dir)]) < 20:
@@ -74,7 +74,7 @@ def choose_direction(globals, explore = False):
 
 def load_q_table():
     global q_table
-    with open("ai/trainingdata-backup-" + str(datetime.datetime.now()), "w") as backup:
+    with open(("ai/trainingdata-backup-" + str(datetime.datetime.now())).replace(":", "-"), "w") as backup:
         with open("ai/trainingdata", "r") as file:
             data = file.read()
             backup.write(data)

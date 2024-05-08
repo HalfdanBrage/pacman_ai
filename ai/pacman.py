@@ -10,7 +10,7 @@ class PacmanAI():
         self.ghosts = None
         self.globals = None
         self.direction = RIGHT
-        self.mode = "q"
+        self.mode = "q_explore"
         self.last_node = None
 
     def get_movement_direction(self):
