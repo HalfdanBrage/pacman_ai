@@ -1,4 +1,4 @@
-import random, json, math
+import random, json, math, threading, datetime
 
 from ai.q_state import State
 
@@ -27,18 +27,25 @@ def get_direction(globals, last_node, explore = False):
     
     return int(direction)
 
+run_count = 0
 def reset():
-    global history, q_table, score
+    global history, q_table, score, run_count
+    run_count += 1
     scores.append(score)
-    print("Average Score: " + str(sum(scores)/len(scores)))
+    print(str(run_count) + " games, average score: " + str(sum(scores)/len(scores)))
     if q_table != {}:
-        save_q_table()
+        if run_count % 100 == 0:
+            minimize_q_table(q_table)
+        threading.Thread(target = save_q_table, args = (q_table,)).start()
+    else:
+        load_q_table()     
+        minimize_q_table(q_table)
     history = []
-    load_q_table() 
+
+def minimize_q_table(q_table):
     for k in q_table.keys():
         for dir in q_table[k].keys():
             q_table[k][dir] = sorted(q_table[k][dir], reverse = True)[:40]
-        
 
 def choose_direction(globals, explore = False):
     global q_table, state
@@ -67,15 +74,16 @@ def choose_direction(globals, explore = False):
 
 def load_q_table():
     global q_table
-    with open("ai/trainingdata", "r") as file:
-        data = file.read()
-        try:
-            q_table = json.loads(data)
-        except:
-            q_table = {}
+    with open("ai/trainingdata-backup-" + str(datetime.datetime.now()), "w") as backup:
+        with open("ai/trainingdata", "r") as file:
+            data = file.read()
+            backup.write(data)
+            try:
+                q_table = json.loads(data)
+            except:
+                q_table = {}
 
-def save_q_table():
-    global q_table
+def save_q_table(q_table):
     f = open("ai/trainingdata", "w")
     f.write(json.dumps(q_table))
     f.close()
