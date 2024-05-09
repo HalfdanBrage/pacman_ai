@@ -56,7 +56,7 @@ def choose_direction(globals, explore = False):
         best_dir = 0
         for dir in available_directions:
                 if explore:
-                    if not str(dir) in q_table[state.generate_hash()] or random.randint(0, 4) == 1:
+                    if not str(dir) in q_table[state.generate_hash()] or random.randint(0, 32) == 1:
                         best_dir = dir
                         break
                     elif len(q_table[state.generate_hash()][str(dir)]) < 20:
