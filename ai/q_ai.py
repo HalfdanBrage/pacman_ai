@@ -7,7 +7,7 @@ direction = 0
 #{state : {actions: [values]}}
 q_table = {}
 history = []
-scores = []
+max_score = 0
 score = 0
 
 ## update state, then do lookup
@@ -29,10 +29,11 @@ def get_direction(globals, last_node, explore = False):
 
 run_count = 0
 def reset(globals):
-    global history, q_table, score, run_count
+    global history, q_table, score, run_count, max_score
     run_count += 1
-    scores.append(score)
-    print(str(run_count) + " games, average score: " + str(sum(scores)/len(scores)) + ", max score: " + str(max(scores)))
+    if score > max_score:
+        max_score = score
+    print(str(run_count) + " games, max score: " + str(max_score))
     if q_table != {}:
         if run_count % 1000 == 0:
             minimize_q_table(q_table)
@@ -71,6 +72,7 @@ def choose_direction(globals, explore = False):
                         high_val = avg_high_value
                         best_dir = dir
         return str(best_dir)
+    #print("NEW")
     return str(random.choice(globals.pacman.validDirections()))
 
 
