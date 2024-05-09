@@ -32,12 +32,13 @@ def reset(globals):
     global history, q_table, score, run_count
     run_count += 1
     scores.append(score)
-    print(str(run_count) + " games, average score: " + str(sum(scores)/len(scores)))
+    print(str(run_count) + " games, average score: " + str(sum(scores)/len(scores)) + ", max score: " + str(max(scores)))
     if q_table != {}:
         if run_count % 1000 == 0:
             minimize_q_table(q_table)
-        t = multiprocessing.Process(target = save_q_table, args=(q_table, ))
-        t.start()
+        if run_count % 50 == 0:
+            t = multiprocessing.Process(target = save_q_table, args=(q_table, ))
+            t.start()
     else:
         load_q_table()     
         minimize_q_table(q_table)
