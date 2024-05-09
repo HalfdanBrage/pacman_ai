@@ -105,12 +105,14 @@ def update_q_table(globals):
 
 
 def update_state(globals, state : State, last_node):
+    global isDead
     state.pacman_node = str(globals.pacman.node.position)
     state.ghost_nodes = [str(g.node.position) for g in globals.ghosts.ghosts]
     state.ghost_target_nodes = [str(g.target.position) for g in globals.ghosts.ghosts]
     state.traversed_ways.append(sorted([state.pacman_node, str(last_node.position)]))
     state.traversed_ways.sort()
     state.level = globals.level
+
     return state
     
 
@@ -121,13 +123,27 @@ def get_initial_state(globals):
     pellet_edges = []
     return State(pacman_node, ghost_nodes, ghost_target_nodes, pellet_edges, globals.level)
 
-
+prev_level = 1
+prev_lives = 0
 prev_score = 0
 def get_fitness(globals):
-    global q_table, history, prev_score, score
+    global q_table, history, prev_score, score, prev_lives, prev_level
     score = globals.score
     fitness = globals.score - prev_score
     prev_score = globals.score
+
+    if prev_level < globals.level:
+        print("Completed level!!!")
+        fitness += 800
+    prev_level = globals.level
+
+    if globals.lives < prev_lives:
+        fitness -= 400
+    prev_lives = globals.lives
+
+    if fitness == 0:
+        fitness = -20
+
     for i, item in enumerate(history):
         (q_table[item[0]])[item[1]][item[2]] += fitness / (len(history) - i)
     return fitness
