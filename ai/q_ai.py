@@ -4,13 +4,13 @@ from ai.q_state import State
 
 state = None
 direction = 0
-#{state : {actions: [values]}}
-q_table = {}
-history = []
-max_score = 0
-score = 0
+q_table = {} # The lookup table for our q learning bot. Maps from state hash to fitness values
+history = [] # The history of the states in the current run. Used for effecting previous states based on the current one
+max_score = 0 # Max score seen this run
+max_level = 0 # Max level seen this run
+score = 0 # Score for the current run
 
-## update state, then do lookup
+## Main method for the q learning ai. Simply returns the direction pacman should move in based on the current game state
 def get_direction(globals, last_node, explore = False):
     global state, direction, q_table
     if last_node == None or q_table == {}:
@@ -28,12 +28,13 @@ def get_direction(globals, last_node, explore = False):
     return int(direction)
 
 run_count = 0
+# Method that prepares everything for the next run
 def reset(globals):
-    global history, q_table, score, run_count, max_score
+    global history, q_table, score, run_count, max_score, max_level
     run_count += 1
     if score > max_score:
         max_score = score
-    print(str(run_count) + " games, max score: " + str(max_score))
+    print(str(run_count) + " games, max score: " + str(max_score) + ", max level: " + str(max_level))
     if q_table != {}:
         if run_count % 1000 == 0:
             minimize_q_table(q_table)
@@ -45,11 +46,13 @@ def reset(globals):
         minimize_q_table(q_table)
     history = []
 
+# Method which scraps the worst values from the q_table
 def minimize_q_table(q_table):
     for k in q_table.keys():
         for dir in q_table[k].keys():
             q_table[k][dir] = sorted(q_table[k][dir], reverse = True)[:40]
 
+# Method which actually chooses a direction
 def choose_direction(globals, explore = False):
     global q_table, state
     if state.generate_hash() in q_table:
@@ -58,15 +61,16 @@ def choose_direction(globals, explore = False):
         best_dir = 0
         for dir in available_directions:
                 if explore:
-                    if not str(dir) in q_table[state.generate_hash()] or random.randint(0, 32) == 1:
+                    if not str(dir) in q_table[state.generate_hash()] or random.randint(0, 512) == 1:
                         best_dir = dir
                         break
-                    elif len(q_table[state.generate_hash()][str(dir)]) < 20:
+                    elif len(q_table[state.generate_hash()][str(dir)]) < 1:
                         best_dir = dir
                         break
                 if str(dir) in q_table[state.generate_hash()]:
                     point_values = sorted(q_table[state.generate_hash()][str(dir)], reverse = True)
-                    avg_high_value = sum(point_values[:4])/(4 if len(point_values) > 4 else len(point_values))
+                    # avg_high_value = sum(point_values[:4])/(4 if len(point_values) > 4 else len(point_values))
+                    avg_high_value = max(point_values) * (random.uniform(0.6, 1.4) if explore else 1)
 
                     if avg_high_value > high_val:
                         high_val = avg_high_value
@@ -74,7 +78,6 @@ def choose_direction(globals, explore = False):
         return str(best_dir)
     #print("NEW")
     return str(random.choice(globals.pacman.validDirections()))
-
 
 def load_q_table():
     global q_table
@@ -126,14 +129,18 @@ def get_initial_state(globals):
     pellet_edges = []
     return State(pacman_node, ghost_nodes, ghost_target_nodes, pellet_edges, globals.level)
 
+
 prev_level = 1
 prev_lives = 0
 prev_score = 0
+# Fitness calculation method. This is based on points scored. Additionally it punishes when pacman dies, punishes when pacman moves along an edge without scoring, and rewards for clearing a level.
 def get_fitness(globals):
-    global q_table, history, prev_score, score, prev_lives, prev_level
+    global q_table, history, prev_score, score, prev_lives, prev_level, max_level
     score = globals.score
     fitness = globals.score - prev_score
     prev_score = globals.score
+    if globals.level > max_level:
+        max_level = globals.level
 
     if prev_level < globals.level:
         print("Completed level!!!")
